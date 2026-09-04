@@ -82,7 +82,7 @@ const AdminDashboard = () => {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-5 border-b border-slate-100 bg-slate-50/50">
           <h3 className="text-sm font-bold text-slate-900">All transactions</h3>
-          <p className="text-slate-400 text-[11px] mt-0.5">Release/refund actions will appear here once those backend endpoints exist.</p>
+          <p className="text-slate-400 text-[11px] mt-0.5">Release/refund actions will appear here</p>
         </div>
 
         {isLoading && <p className="py-14 text-center text-xs text-slate-400">Loading…</p>}
