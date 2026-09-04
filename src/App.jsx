@@ -18,18 +18,6 @@ import AdminDashboard from './features/admin/AdminDashboard.jsx'
 
 function App() {
 
-  const { setCurrentUser, handleCurrentUser } = useContext(AppContext)
-
-  useEffect(() => {
-    const getUser = async () => {
-      const response = await handleCurrentUser()
-      if (response) {
-        setCurrentUser(response)
-      }
-    }
-    getUser()
-  }, [])
-
   return (
     <>
       <Routes>

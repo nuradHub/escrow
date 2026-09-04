@@ -5,7 +5,17 @@ import TransactionsTable from '../TransactionsTable'
 import { AppContext } from '../../context/ContextProvider'
 
 const SellerDashboard = ()=> {
-  const { currentUser, handleTransactions, setTransactions, transactions, isLoading, errMessage } = useContext(AppContext)
+  const { currentUser, handleTransactions, setTransactions, transactions, isLoading, errMessage, handleCurrentUser, setCurrentUser } = useContext(AppContext)
+
+  useEffect(() => {
+    const getUser = async () => {
+      const response = await handleCurrentUser()
+      if (response) {
+        setCurrentUser(response)
+      }
+    }
+    getUser()
+  }, [])
 
   useEffect(() => {
     const getTransactions = async ()=> {
