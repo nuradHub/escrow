@@ -2,25 +2,26 @@ import axios from 'axios'
 import { useContext, useEffect, useState } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { AppContext } from '../../context/ContextProvider'
+import {LoaderCircleIcon} from 'lucide-react'
 
-const AdminProtectedRoute = ()=> {
+const AdminProtectedRoute = () => {
 
-  const {setCurrentUser, currentUser} = useContext(AppContext)
+  const { setCurrentUser, currentUser } = useContext(AppContext)
   const [message, setMessage] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  useEffect(()=> {
-    const verify = async ()=> {
-      try{
+  useEffect(() => {
+    const verify = async () => {
+      try {
         setLoading(true)
-        const {data} = await axios.get('/verify-session')
-        const {message, user} = data
+        const { data } = await axios.get('/verify-session')
+        const { message, user } = data
         setMessage(message)
         setCurrentUser(user)
-      }catch(err){
+      } catch (err) {
         console.log(err.message)
         setMessage(err.response?.data?.message)
-      }finally{
+      } finally {
         setLoading(false)
       }
     }
@@ -30,16 +31,19 @@ const AdminProtectedRoute = ()=> {
   if (loading || message === null) {
     return (
       <div className="flex h-screen items-center justify-center bg-slate-50">
-        <p className="text-sm text-slate-400">Loading session…</p>
+        <div className='flex flex-col gap-2 items-center'>
+          <LoaderCircleIcon className="animate-spin" size={30} />
+          <p className="text-md text-slate-400">Loading session…</p>
+        </div>
       </div>
     )
   }
 
   if (!currentUser || message === false) return <Navigate to="/login" replace />
-  if(currentUser && currentUser.role === 'seller') return <Navigate to='/seller/dashboard' replace/>
-  if(currentUser && currentUser.role === 'buyer') return <Navigate to='/buyer/dashboard' replace/>
+  if (currentUser && currentUser.role === 'seller') return <Navigate to='/seller/dashboard' replace />
+  if (currentUser && currentUser.role === 'buyer') return <Navigate to='/buyer/dashboard' replace />
 
-  if(currentUser && (currentUser.role === 'admin')){
+  if (currentUser && (currentUser.role === 'admin')) {
     return <Outlet />
   }
 }
