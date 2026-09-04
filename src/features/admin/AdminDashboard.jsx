@@ -72,68 +72,12 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-<<<<<<< HEAD
       {/* Right Content Area toggling active views */}
       <div className="w-full lg:col-span-4 px-2 lg:px-0">
         {activeTab === 'dashboard' && <AdminOverviewContent />}
         {activeTab === 'transactions' && <AdminAllTransactionsContent />}
         {activeTab === 'users' && <AdminUsersContent />}
         {activeTab === 'admins' && <AdminAdminsContent />}
-=======
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-slate-100 bg-slate-50/50">
-          <h3 className="text-sm font-bold text-slate-900">All transactions</h3>
-          <p className="text-slate-400 text-[11px] mt-0.5">Release/refund actions will appear here</p>
-        </div>
-
-        {isLoading && <p className="py-14 text-center text-xs text-slate-400">Loading…</p>}
-        {!isLoading && (localError || errMessage) && <p className="py-14 text-center text-xs text-rose-600">{localError || errMessage}</p>}
-        {!isLoading && !localError && !errMessage && transactions.length === 0 && (
-          <p className="py-14 text-center text-xs text-slate-500">No transactions on the platform yet.</p>
-        )}
-
-        {!isLoading && !localError && !errMessage && transactions.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200">
-                  <th className="py-3 px-4">Transaction</th>
-                  <th className="py-3 px-4">Seller</th>
-                  <th className="py-3 px-4">Buyer</th>
-                  <th className="py-3 px-4 text-right">Value</th>
-                  <th className="py-3 px-4 text-center">Status</th>
-                  <th className="py-3 px-4 text-center">Buyer satisfied</th>
-                  <th className="py-3 px-4 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-xs">
-                {transactions.map((txn) => (
-                  <tr key={txn._id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3.5 px-4">
-                      <span className="font-mono text-slate-900 font-bold block">{txn._id.slice(-8).toUpperCase()}</span>
-                      <span className="text-slate-400 text-[10px] block mt-0.5">{txn.title}</span>
-                    </td>
-                    <td className="py-3.5 px-4 text-slate-600 font-medium">{txn.sellerEmail || '—'}</td>
-                    <td className="py-3.5 px-4 text-slate-600 font-medium">{txn.buyerEmail || '—'}</td>
-                    <td className="py-3.5 px-4 text-right font-bold text-slate-900">{formatAmount(txn.totalAmount, txn.currency || 'USD')}</td>
-                    <td className="py-3.5 px-4 text-center"><StatusBadge status={txn.status} /></td>
-                    <td className="py-3.5 px-4 text-center">
-                      {txn.buyerApproved ? (
-                        <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5">Confirmed</span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5">Pending</span>
-                      )}
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <Link to={`/admin/dashboard/transaction/${txn._id}`} className="text-emerald-700 font-bold hover:underline">View</Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
->>>>>>> f1184795e87923895f28d00a16b132efd1c4ef80
       </div>
     </div>
   )
