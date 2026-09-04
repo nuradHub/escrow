@@ -127,7 +127,6 @@ const ContextProvider = ({children}) => {
       
     }catch(err){
       console.log(err.message)
-      if(err.response?.data?.message) setErrMessage(err.response?.data?.message)
     }finally{
       setIsLoading(false)
     }

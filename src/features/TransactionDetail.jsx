@@ -183,7 +183,7 @@ export default function TransactionDetail() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <Link to="/dashboard" className="text-xs font-semibold text-slate-400 hover:text-slate-700">
+      <Link to={currentUser.role === 'seller' ? `/seller/dashboard` : `/buyer/dashboard`} className="text-xs font-semibold text-slate-400 hover:text-slate-700">
         ← Back to dashboard
       </Link>
 

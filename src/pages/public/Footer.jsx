@@ -12,7 +12,7 @@ const Footer = ({className}) => {
             <span>Escrow</span>
           </div>
           <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
-            Secure peer-to-peer escrow platform built for reliable NGN and USD transactions. We hold funds safely until both parties fulfill their commitments.
+            Secure peer-to-peer escrow platform built for reliable USD transactions. We hold funds safely until both parties fulfill their commitments.
           </p>
         </div>
 

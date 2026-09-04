@@ -39,40 +39,40 @@ const Main = () => {
         <div className="flex flex-wrap justify-center gap-8 pt-6">
 
           {/* Step 01 */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative flex-1 max-w-70 min-w-70" data-aos='fade-up' data-aos-delay='100'>
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative flex-1 max-w-80 min-w-70" data-aos='fade-up' data-aos-delay='100'>
             <div className="absolute -top-4 left-6 bg-slate-900 text-emerald-400 w-8 h-8 rounded-full font-bold flex items-center justify-center text-xs border-2 border-white shadow">1</div>
             <div className="flex items-center justify-between mt-2 mb-2">
-              <h3 className="font-bold text-slate-900 text-sm">Agree on terms</h3>
+              <h3 className="font-bold text-slate-900 text-md">Agree on terms</h3>
               <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-mono font-bold">PENDING</span>
             </div>
             <p className="text-slate-500 text-xs leading-loose">Buyer or seller starts the deal and invites the other side to confirm the price, item, and delivery terms.</p>
           </div>
 
           {/* Step 02 */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative flex-1 max-w-70 min-w-70" data-aos='fade-up' data-aos-delay='150'>
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative flex-1 max-w-80 min-w-70" data-aos='fade-up' data-aos-delay='150'>
             <div className="absolute -top-4 left-6 bg-slate-900 text-emerald-400 w-8 h-8 rounded-full font-bold flex items-center justify-center text-xs border-2 border-white shadow">2</div>
             <div className="flex items-center justify-between mt-2 mb-2">
-              <h3 className="font-bold text-slate-900 text-sm">Funds held safely</h3>
+              <h3 className="font-bold text-slate-900 text-md">Funds held safely</h3>
               <span className="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-mono font-bold">FUNDED</span>
             </div>
             <p className="text-slate-500 text-xs leading-loose">Once agreed, the payment is held by Escrow not released to the seller until the buyer confirms.</p>
           </div>
 
           {/* Step 03 */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative flex-1 max-w-70 min-w-70" data-aos='fade-up' data-aos-delay='200'>
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative flex-1 max-w-80 min-w-70" data-aos='fade-up' data-aos-delay='200'>
             <div className="absolute -top-4 left-6 bg-slate-900 text-emerald-400 w-8 h-8 rounded-full font-bold flex items-center justify-center text-xs border-2 border-white shadow">3</div>
             <div className="flex items-center justify-between mt-2 mb-2">
-              <h3 className="font-bold text-slate-900 text-sm">Buyer confirms</h3>
+              <h3 className="font-bold text-slate-900 text-md">Buyer confirms</h3>
               <span className="text-[10px] bg-purple-100 text-purple-800 px-2 py-0.5 rounded font-mono font-bold">IN_PROGRESS</span>
             </div>
             <p className="text-slate-500 text-xs leading-loose">When the item arrives and matches what was agreed, the buyer marks the deal satisfied.</p>
           </div>
 
           {/* Step 04 */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative flex-1 max-w-70 min-w-70" data-aos='fade-up' data-aos-delay='250'>
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative flex-1 max-w-80 min-w-70" data-aos='fade-up' data-aos-delay='250'>
             <div className="absolute -top-4 left-6 bg-slate-900 text-emerald-400 w-8 h-8 rounded-full font-bold flex items-center justify-center text-xs border-2 border-white shadow">4</div>
             <div className="flex items-center justify-between mt-2 mb-2">
-              <h3 className="font-bold text-slate-900 text-sm">Funds released</h3>
+              <h3 className="font-bold text-slate-900 text-md">Funds released</h3>
               <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-mono font-bold">RELEASED</span>
             </div>
             <p className="text-slate-500 text-xs leading-loose">Escrow releases the held funds to the seller. Admins can step in if anything is disputed.</p>
