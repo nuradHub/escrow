@@ -11,7 +11,7 @@ const Header = ({ className }) => {
         <ShieldCheck className='bg-emerald-500/60 text-black p-1 rounded-sm ' size={35} />
         Escrow
       </div>
-      {!(path.includes('register') || path.includes('login')) &&
+      {!(path.includes('register') || path.includes('login') || path.includes('reset-password')) &&
         <div className='flex items-center gap-5'>
           <Link to='/login' className='text-white'>Sign in</Link>
           <Link to='/register' className='bg-emerald-500/80 py-1 px-2 rounded-lg font-medium'>Get Started</Link>
