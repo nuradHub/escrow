@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { Check, CreditCard, ShieldCheck } from 'lucide-react'
+import { Check, CreditCard, ShieldCheck, Loader2, Truck } from 'lucide-react'
 import { approveTransactionAsBuyer, fetchTransaction, inviteCounterparty, payForTransaction, verifyPayment } from '../api'
 import StatusBadge from './StatusBadge'
 import { useContext } from 'react'
@@ -16,7 +16,7 @@ const formatAmount = (amount, currency) => {
 }
 
 const STEPS = ['Agreement', 'Payment', 'Delivery', 'Inspection', 'Closed']
-const STEP_INDEX = { pending: 0, agreed: 1, paid: 2, in_progress: 3, released: 4, completed: 4 }
+const STEP_INDEX = { pending: 0, agreed: 1, paid: 2, in_progress: 3, pending_release: 3, completed: 4 }
 const TERMINAL_NEGATIVE = ['disputed', 'refunded', 'canceled']
 
 function Row({ label, value }) {
@@ -52,10 +52,10 @@ function Stepper({ status }) {
           <div className="flex flex-col items-center">
             <div
               className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold border-2 ${i < activeIndex
-                  ? 'bg-emerald-500 border-emerald-500 text-white'
-                  : i === activeIndex
-                    ? 'bg-slate-900 border-slate-900 text-white'
-                    : 'bg-white border-slate-300 text-slate-400'
+                ? 'bg-emerald-500 border-emerald-500 text-white'
+                : i === activeIndex
+                  ? 'bg-slate-900 border-slate-900 text-white'
+                  : 'bg-white border-slate-300 text-slate-400'
                 }`}
             >
               {i < activeIndex ? <Check className="h-4 w-4" /> : i + 1}
@@ -88,10 +88,16 @@ export default function TransactionDetail() {
   const [approving, setApproving] = useState(false)
   const [approveError, setApproveError] = useState('')
 
+  const [delivering, setDelivering] = useState(false)
+  const [deliverError, setDeliverError] = useState('')
+
   const [paying, setPaying] = useState(false)
   const [payError, setPayError] = useState('')
   const [verifying, setVerifying] = useState(false)
   const [verifyMessage, setVerifyMessage] = useState('')
+
+  const [cancelling, setCancelling] = useState(false)
+  const [cancelError, setCancelError] = useState('')
 
   useEffect(() => {
     const getTransaction = async () => {
@@ -108,14 +114,18 @@ export default function TransactionDetail() {
     getTransaction()
   }, [id])
 
-  // Paystack redirects the buyer back here with ?payment=callback once checkout is done.
-
   useEffect(() => {
-    if (searchParams.get('payment') !== 'callback') return
+    const payment = searchParams.get('payment')
+    if (payment !== 'callback' && payment !== 'cancelled') return
+
+    if (payment === 'cancelled') {
+      setVerifyMessage('Payment was cancelled. You can try again whenever you\'re ready.')
+      setSearchParams({}, { replace: true })
+      return
+    }
 
     setVerifying(true)
     const verifyTransaction = async () => {
-
       try {
         const { message, transaction } = await verifyPayment(id)
         setVerifyMessage(message)
@@ -129,7 +139,6 @@ export default function TransactionDetail() {
     }
     verifyTransaction()
   }, [id])
-
 
   const handlePay = async () => {
     setPayError('')
@@ -160,6 +169,19 @@ export default function TransactionDetail() {
     }
   }
 
+  const handleMarkDelivered = async () => {
+    setDeliverError('')
+    setDelivering(true)
+    try {
+      const { data } = await axios.put(`/transactions/${id}/deliver`)
+      if (data.transaction) setTxn(data.transaction)
+    } catch (err) {
+      setDeliverError(err.response?.data?.message || 'Could not mark as delivered.')
+    } finally {
+      setDelivering(false)
+    }
+  }
+
   const handleApprove = async () => {
     setApproveError('')
     setApproving(true)
@@ -173,13 +195,34 @@ export default function TransactionDetail() {
     }
   }
 
-  if (loading) return <p className="py-16 text-center text-sm text-slate-400">Loading…</p>
+  if (loading) return (
+    <div className="py-16 flex flex-col items-center justify-center space-y-3">
+      <Loader2 className="h-6 w-6 text-emerald-600 animate-spin" />
+      <p className="text-xs font-medium text-slate-400 animate-pulse">Fetching database records...</p>
+    </div>
+  )
+
   if (error || !txn) return <p className="py-16 text-center text-sm text-rose-600">{error || 'Transaction not found'}</p>
 
   const isCreator = txn.user?._id === currentUser?._id
   const counterpartySet = currentUser?.role === 'seller' ? !!txn.buyerEmail : !!txn.sellerEmail
   const counterpartyLabel = txn.user?.role === 'seller' ? 'Buyer' : 'Seller'
   const isBuyerOnDeal = currentUser?.role === 'buyer' && (txn.buyerEmail === currentUser?.email || isCreator)
+  const isSellerOnDeal = currentUser?.role === 'seller' && (txn.sellerEmail === currentUser?.email || isCreator)
+
+  const handleCancelTransaction = async () => {
+    if (!window.confirm("Are you sure you want to cancel this transaction? This action cannot be undone.")) return
+    setCancelError('')
+    setCancelling(true)
+    try {
+      const { data } = await axios.put(`/transactions/${id}/cancel`)
+      if (data.transaction) setTxn(data.transaction)
+    } catch (err) {
+      setCancelError(err.response?.data?.message || 'Could not cancel transaction.')
+    } finally {
+      setCancelling(false)
+    }
+  }
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -235,7 +278,7 @@ export default function TransactionDetail() {
 
       {verifying && (
         <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-          Confirming your payment with Paystack…
+          Confirming your payment with Tazapay…
         </div>
       )}
       {!verifying && verifyMessage && (
@@ -244,13 +287,14 @@ export default function TransactionDetail() {
         </div>
       )}
 
+      {/* 1. BUYER ACTION: Fund transaction if pending or agreed */}
       {isBuyerOnDeal && ['pending', 'agreed'].includes(txn.status) && (
         <div className="mt-6 bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
           <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
             <CreditCard className="h-3.5 w-3.5" /> Fund this transaction
           </p>
           <p className="text-xs text-slate-500">
-            You'll be sent to Paystack's secure checkout to pay {formatAmount(txn?.totalAmount, txn?.currency)}.
+            You'll be sent to Tazapay's secure checkout to pay {formatAmount(txn?.totalAmount, txn?.currency)}.
             The seller won't see this money until you confirm you're satisfied.
           </p>
           {payError && (
@@ -261,15 +305,38 @@ export default function TransactionDetail() {
             disabled={paying}
             className="mt-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white transition-all shadow-sm disabled:opacity-50"
           >
-            {paying ? 'Redirecting to Paystack…' : `Pay ${formatAmount(txn?.totalAmount, txn?.currency)} with Paystack`}
+            {paying ? 'Redirecting to Tazapay…' : `Pay ${formatAmount(txn?.totalAmount, txn?.currency)} with Tazapay`}
           </button>
         </div>
       )}
 
-      {isBuyerOnDeal && !['pending', 'agreed'].includes(txn.status) && (
+      {/* 2. SELLER ACTION: Mark as Delivered when status is 'paid' */}
+      {isSellerOnDeal && txn.status === 'paid' && (
         <div className="mt-6 bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
           <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
-            <ShieldCheck className="h-3.5 w-3.5" /> Your confirmation
+            <Truck className="h-3.5 w-3.5" /> Fulfill order
+          </p>
+          <p className="text-xs text-slate-500 mb-3">
+            Funds are successfully held in escrow. Ship or deliver the item to the buyer, then mark the order as delivered.
+          </p>
+          {deliverError && (
+            <p className="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">{deliverError}</p>
+          )}
+          <button
+            onClick={handleMarkDelivered}
+            disabled={delivering}
+            className="rounded-xl bg-indigo-600 hover:bg-indigo-700 px-4 py-2.5 text-xs font-bold text-white transition-all shadow-sm disabled:opacity-50"
+          >
+            {delivering ? 'Updating status...' : 'Mark as Delivered / Shipped'}
+          </button>
+        </div>
+      )}
+
+      {/* 3. BUYER ACTION: Confirm satisfaction when status is 'in_progress' */}
+      {isBuyerOnDeal && txn.status === 'in_progress' && (
+        <div className="mt-6 bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
+            <ShieldCheck className="h-3.5 w-3.5" /> Inspection & Confirmation
           </p>
           {txn.buyerApproved ? (
             <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
@@ -279,18 +346,18 @@ export default function TransactionDetail() {
             </div>
           ) : (
             <div>
-              <p className="text-xs text-slate-500">
-                Once you're happy with the terms above, confirm here so the seller and admin know the deal can move forward.
+              <p className="text-xs text-slate-500 mb-3">
+                Have you received and inspected your order? Confirming your satisfaction will release the escrow funds to the seller.
               </p>
               {approveError && (
-                <p className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">{approveError}</p>
+                <p className="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">{approveError}</p>
               )}
               <button
                 onClick={handleApprove}
                 disabled={approving}
-                className="mt-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white transition-all shadow-sm disabled:opacity-50"
+                className="rounded-xl bg-emerald-500 hover:bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white transition-all shadow-sm disabled:opacity-50"
               >
-                {approving ? 'Confirming…' : "I'm satisfied with this offer"}
+                {approving ? 'Completing deal…' : "I'm satisfied, release funds"}
               </button>
             </div>
           )}
@@ -345,6 +412,26 @@ export default function TransactionDetail() {
               <p className="text-emerald-600 font-medium mt-1">✓ Invitation sent and counterparty linked.</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* 4. CANCEL TRANSACTION: Available to participants if not yet finalized */}
+      {!TERMINAL_NEGATIVE.includes(txn.status) && !['paid', 'in_progress', 'pending_release', 'completed'].includes(txn.status) && (isBuyerOnDeal || isSellerOnDeal) && (
+        <div className="mt-6 bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Danger zone</p>
+          <p className="text-xs text-slate-500 mb-3">
+            Changed your mind about this deal? You can cancel the transaction before payment is made.
+          </p>
+          {cancelError && (
+            <p className="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">{cancelError}</p>
+          )}
+          <button
+            onClick={handleCancelTransaction}
+            disabled={cancelling}
+            className="rounded-xl border border-rose-200 bg-white hover:bg-rose-50 px-4 py-2 text-xs font-bold text-rose-700 transition-all shadow-sm disabled:opacity-50"
+          >
+            {cancelling ? 'Cancelling...' : 'Cancel Transaction'}
+          </button>
         </div>
       )}
     </div>

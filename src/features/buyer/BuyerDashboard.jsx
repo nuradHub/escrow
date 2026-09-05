@@ -34,14 +34,14 @@ const BuyerDashboard = () => {
 
   // Sum up metrics for buyer
   const escrowHoldsTotal = buyerTransactions
-    .filter(txn => txn.status === 'paid')
+    .filter(txn => txn.status === 'paid' || txn.status === 'in_progress' || txn.status === 'pending_release')
     .reduce((sum, txn) => sum + Number(txn.amount || 0), 0)
 
   const amountCompletedTotal = buyerTransactions
-    .filter(txn => txn.status === 'completed' || txn.status === 'released')
+    .filter(txn => txn.status === 'completed')
     .reduce((sum, txn) => sum + Number(txn.amount || 0), 0)
 
-  const activeOrders = buyerTransactions.filter(txn => txn.status === 'pending' || txn.status === 'in-progress' || txn.status === 'agreed')
+  const activeOrders = buyerTransactions.filter(txn => txn.status === 'pending' || txn.status === 'in_progress' || txn.status === 'agreed')
 
   return (
     <div>

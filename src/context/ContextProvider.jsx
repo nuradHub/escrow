@@ -9,6 +9,7 @@ const ContextProvider = ({children}) => {
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
+  const [country, setCountry] = useState('') 
   const [view, setView] = useState(false)
   const [errMessage, setErrMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
@@ -23,13 +24,15 @@ const ContextProvider = ({children}) => {
         role,
         name,
         email,
-        password
+        password,
+        country: country.toUpperCase()
       })
       
       setRole('')
       setName('')
       setEmail('')
       setPassword('')
+      setCountry('')
 
       if(response.data) return response.data
       
@@ -145,7 +148,8 @@ const ContextProvider = ({children}) => {
     successMessage, setSuccessMessage,
     currentUser, setCurrentUser,
     transactions, setTransactions,
-    handleTransactions, handleCurrentUser
+    handleTransactions, handleCurrentUser,
+    country, setCountry
   }
 
   return (

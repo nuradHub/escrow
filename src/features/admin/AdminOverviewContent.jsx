@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react"
 import { AppContext } from "../../context/ContextProvider"
 import { fetchAllTransactionsAdmin } from "../../api"
 import { Link } from 'react-router-dom'
-import { Layers, ShieldAlert, ShieldCheck, Wallet, Users, ArrowUpRight} from 'lucide-react'
+import { Layers, ShieldAlert, ShieldCheck, Wallet, Users, ArrowUpRight, TrendingUp } from 'lucide-react'
 import StatusBadge from '../StatusBadge'
 
 
@@ -40,6 +40,7 @@ const AdminOverviewContent = () => {
     total: transactions.length,
     disputed: transactions.filter((t) => t.status === 'disputed').length,
     awaitingBuyer: transactions.filter((t) => !t.buyerApproved).length,
+    totalEscrowProfits: formatAmount(transactions.reduce((sum, t) => sum + (Number(t.escrowHolds) || 0), 0), 'USD'),
   }
 
   return (
@@ -79,6 +80,13 @@ const AdminOverviewContent = () => {
               <span className="text-lg font-bold text-slate-900 block">{stats.disputed}</span>
             </div>
           </div>
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4 sm:col-span-2">
+            <div className="bg-indigo-100 text-indigo-700 p-3 rounded-xl"><TrendingUp className="h-5 w-5" /></div>
+            <div>
+              <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider block">Total Escrow Profits</span>
+              <span className="text-lg font-bold text-slate-900 block">{stats.totalEscrowProfits}</span>
+            </div>
+          </div>
         </div>
 
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
@@ -111,6 +119,7 @@ const AdminOverviewContent = () => {
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/50">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live Feed
           </span>
+
         </div>
 
         {isLoading && <p className="py-14 text-center text-xs text-slate-400">Loading…</p>}

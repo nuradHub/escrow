@@ -39,3 +39,10 @@ export const verifyPayment = async (id)=> {
   const { data } = await axios.get(`/transactions/${id}/verify-payment`)
   return data
 }
+
+export const fetchAllUsers = async ()=> {
+  const { data } = await axios.get('/users/all')
+  return data
+}
+
+

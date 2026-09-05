@@ -6,7 +6,7 @@ import { AppContext } from "../../context/ContextProvider"
 
 const Register = () => {
 
-  const { role, setRole, name, setName, email, setEmail, password, setPassword, view, setView, errMessage, isLoading, handleRegister, setErrMessage, successMessage, setSuccessMessage } = useContext(AppContext)
+  const { role, setRole, name, setName, email, setEmail, password, setPassword, country, setCountry, view, setView, errMessage, isLoading, handleRegister, setErrMessage, successMessage, setSuccessMessage } = useContext(AppContext)
 
   const navigate = useNavigate()
 
@@ -79,14 +79,18 @@ const Register = () => {
                 </div>
                 <div className="flex flex-col gap-2">
                   <label htmlFor="email" className="text-slate-800">Email</label>
-                  <input type="email" id='name' name='name' placeholder="James@gmail.com" className="border border-slate-300 py-2 px-4 rounded-xl focus:outline-0 focus:border-slate-500" required onChange={(e) => setEmail(e.target.value)} value={email} />
+                  <input type="email" id='email' name='email' placeholder="James@gmail.com" className="border border-slate-300 py-2 px-4 rounded-xl focus:outline-0 focus:border-slate-500" required onChange={(e) => setEmail(e.target.value)} value={email} />
                 </div>
                 <div className="flex flex-col gap-2">
                   <label htmlFor="password" className="text-slate-800">Password</label>
                   <div className="flex items-center relative w-full">
-                    <input type={`${view ? 'text' : 'password'}`} id='password' name='name' placeholder="password" className="border border-slate-300 py-2 px-4 pr-13 rounded-xl focus:outline-0 focus:border-slate-500 flex-1" required onChange={(e) => setPassword(e.target.value)} value={password} />
+                    <input type={`${view ? 'text' : 'password'}`} id='password' name='password' placeholder="password" className="border border-slate-300 py-2 px-4 pr-13 rounded-xl focus:outline-0 focus:border-slate-500 flex-1" required onChange={(e) => setPassword(e.target.value)} value={password} />
                     <Eye className="absolute right-7 text-emerald-400/80 cursor-pointer" size={14} onClick={() => setView(!view)} />
                   </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="Country" className="text-slate-800">Country</label>
+                  <input type="text" id='country' name='country' placeholder="US" className="border border-slate-300 py-2 px-4 rounded-xl focus:outline-0 focus:border-slate-500" required onChange={(e) => setCountry(e.target.value)} value={country} />
                 </div>
                 <button type="submit" className="flex items-center justify-center bg-slate-900 text-white font-medium p-2 rounded-xl flex-1 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60" disabled={isLoading}>{isLoading ? <LoaderCircle size={20} className="animate-spin" /> : 'Create account'}</button>
               </form>

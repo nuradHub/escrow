@@ -2,9 +2,9 @@ import { useContext, useEffect, useState } from "react"
 import { AppContext } from "../../context/ContextProvider"
 import { fetchAllTransactionsAdmin } from "../../api"
 import { Link } from 'react-router-dom'
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight, CheckCircle, Building2 } from 'lucide-react'
 import StatusBadge from '../StatusBadge'
-
+import axios from 'axios'
 
 function formatAmount(amount, currency) {
   try {
@@ -18,6 +18,7 @@ const AdminAllTransactionsContent = () => {
   const { isLoading, errMessage } = useContext(AppContext)
   const [transactions, setTransactions] = useState([])
   const [localError, setLocalError] = useState('')
+  const [actionLoadingId, setActionLoadingId] = useState(null)
 
   useEffect(() => {
     const getTransactions = async () => {
@@ -33,6 +34,23 @@ const AdminAllTransactionsContent = () => {
     }
     getTransactions()
   }, [])
+
+  const handleCompletePayout = async (txnId) => {
+    if (!window.confirm("Have you sent the funds to the seller's bank account? This will close the escrow and mark the transaction as completed.")) return
+    
+    setActionLoadingId(txnId)
+    try {
+      const { data } = await axios.put(`/admin/transactions/${txnId}/complete-payout`)
+      if (data.transaction) {
+        setTransactions(prev => prev.map(t => (t._id === txnId ? data.transaction : t)))
+      }
+    } catch (err) {
+      console.error(err.response?.data?.message || err.message)
+      alert(err.response?.data?.message || 'Could not complete payout.')
+    } finally {
+      setActionLoadingId(null)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -54,7 +72,7 @@ const AdminAllTransactionsContent = () => {
               <thead>
                 <tr className="bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200">
                   <th className="py-3 px-4">Transaction ID</th>
-                  <th className="py-3 px-4">Seller</th>
+                  <th className="py-3 px-4">Seller & Payout Details</th>
                   <th className="py-3 px-4">Buyer</th>
                   <th className="py-3 px-4 text-right">Value</th>
                   <th className="py-3 px-4 text-center">Status</th>
@@ -63,30 +81,64 @@ const AdminAllTransactionsContent = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs">
-                {transactions.map((txn) => (
-                  <tr key={txn._id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3.5 px-4">
-                      <span className="font-mono text-slate-900 font-bold block">{txn._id.slice(-8).toUpperCase()}</span>
-                      <span className="text-slate-400 text-[10px] block mt-0.5">{txn.title}</span>
-                    </td>
-                    <td className="py-3.5 px-4 text-slate-600 font-medium">{txn.sellerEmail || '—'}</td>
-                    <td className="py-3.5 px-4 text-slate-600 font-medium">{txn.buyerEmail || '—'}</td>
-                    <td className="py-3.5 px-4 text-right font-bold text-slate-900">{formatAmount(txn.totalAmount, txn.currency || 'USD')}</td>
-                    <td className="py-3.5 px-4 text-center"><StatusBadge status={txn.status} /></td>
-                    <td className="py-3.5 px-4 text-center">
-                      {txn.buyerApproved ? (
-                        <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5">Confirmed</span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5">Pending</span>
-                      )}
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <Link to={`/admin/dashboard/transaction/${txn._id}`} className="inline-flex items-center gap-1 text-emerald-700 font-bold hover:underline">
-                        View <ArrowUpRight className="h-3 w-3" />
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+                {transactions.map((txn) => {
+                  const isProcessing = actionLoadingId === txn._id
+                  const bank = txn?.bankDetails
+
+                  return (
+                    <tr key={txn._id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3.5 px-4">
+                        <span className="font-mono text-slate-900 font-bold block">{txn._id.slice(-8).toUpperCase()}</span>
+                        <span className="text-slate-400 text-[10px] block mt-0.5">{txn.title}</span>
+                      </td>
+                      <td className="py-3.5 px-4 text-slate-600">
+                        <span className="font-medium text-slate-900 block">{txn.sellerEmail || '—'}</span>
+                        {bank && bank.accountNumber ? (
+                          <div className="mt-1 space-y-0.5 bg-slate-50 p-2 rounded-lg border border-slate-200">
+                            <p className="font-semibold text-slate-800 flex items-center gap-1">
+                              <Building2 className="h-3 w-3 text-indigo-600 shrink-0" />
+                              {bank.bankName} ({bank.accountNumber})
+                            </p>
+                            <p className="text-[10px] text-slate-500">{bank.accountName} {bank.bankCode ? `· Code: ${bank.bankCode}` : ''}</p>
+                          </div>
+                        ) : (
+                          <span className="text-[10px] text-amber-600 italic block mt-0.5">No bank details added</span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 text-slate-600 font-medium">{txn.buyerEmail || '—'}</td>
+                      <td className="py-3.5 px-4 text-right font-bold text-slate-900">{formatAmount(txn.totalAmount, txn.currency || 'USD')}</td>
+                      <td className="py-3.5 px-4 text-center"><StatusBadge status={txn.status} /></td>
+                      <td className="py-3.5 px-4 text-center">
+                        {txn.buyerApproved ? (
+                          <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5">Confirmed</span>
+                        ) : (
+                          <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5">Pending</span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 text-right space-y-2">
+                        {/* Admin Action Button: Only active when buyer requests release / pending release */}
+                        {txn.status === 'pending_release' && (
+                          <div>
+                            <button
+                              onClick={() => handleCompletePayout(txn._id)}
+                              disabled={isProcessing}
+                              className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-2.5 py-1.5 rounded-lg transition-all disabled:opacity-50 shadow-sm"
+                              title="Mark as paid out and complete transaction"
+                            >
+                              <CheckCircle className="h-3 w-3" />
+                              {isProcessing ? 'Processing...' : 'Mark Paid & Complete'}
+                            </button>
+                          </div>
+                        )}
+                        <div>
+                          <Link to={`/admin/dashboard/transaction/${txn._id}`} className="inline-flex items-center gap-1 text-emerald-700 font-bold hover:underline text-[11px]">
+                            View <ArrowUpRight className="h-3 w-3" />
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
