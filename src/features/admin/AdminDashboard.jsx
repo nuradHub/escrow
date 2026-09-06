@@ -41,7 +41,7 @@ const AdminDashboard = () => {
       } catch (err) {
         console.log(err.message)
         setError(err.response?.data?.message)
-      }finally{
+      } finally {
         setLoading(false)
       }
     }
@@ -51,7 +51,7 @@ const AdminDashboard = () => {
   return (
     <div className="flex flex-col lg:grid lg:grid-cols-5 gap-8 items-start min-h-[calc(100vh-120px)] pb-24 lg:pb-0">
       {/* Sidebar Navigation Panel */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md p-3 border-t border-slate-200 shadow-lg lg:sticky lg:col-span-1 lg:p-4 lg:rounded-2xl lg:border lg:border-slate-200 lg:shadow-sm lg:space-y-1 lg:top-6 lg:flex lg:flex-col lg:justify-between lg:h-full lg:min-h-125]">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md p-3 border-t border-slate-200 shadow-lg lg:sticky lg:col-span-1 lg:p-4 lg:rounded-2xl lg:border lg:border-slate-200 lg:shadow-sm lg:space-y-1 lg:top-6 lg:flex lg:flex-col lg:justify-between lg:h-full lg:min-h-125">
         <div className="flex justify-around items-center space-x-1 lg:space-y-1 lg:flex-col lg:space-x-0 lg:w-full">
           <div className="hidden lg:block px-3 py-2 mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
             Admin Control

@@ -99,6 +99,9 @@ export default function TransactionDetail() {
   const [cancelling, setCancelling] = useState(false)
   const [cancelError, setCancelError] = useState('')
 
+  const [disputing, setDisputing] = useState(false)
+  const [disputeError, setDisputeError] = useState('')
+
   useEffect(() => {
     const getTransaction = async () => {
       setLoading(true)
@@ -221,6 +224,20 @@ export default function TransactionDetail() {
       setCancelError(err.response?.data?.message || 'Could not cancel transaction.')
     } finally {
       setCancelling(false)
+    }
+  }
+
+  const handleDisputeTransaction = async () => {
+    if (!window.confirm("Are you sure you want to raise a dispute? This will freeze the transaction for admin review.")) return
+    setDisputeError('')
+    setDisputing(true)
+    try {
+      const { data } = await axios.put(`/transactions/${id}/dispute`)
+      if (data.transaction) setTxn(data.transaction)
+    } catch (err) {
+      setDisputeError(err.response?.data?.message || 'Could not dispute transaction.')
+    } finally {
+      setDisputing(false)
     }
   }
 
@@ -431,6 +448,26 @@ export default function TransactionDetail() {
             className="rounded-xl border border-rose-200 bg-white hover:bg-rose-50 px-4 py-2 text-xs font-bold text-rose-700 transition-all shadow-sm disabled:opacity-50"
           >
             {cancelling ? 'Cancelling...' : 'Cancel Transaction'}
+          </button>
+        </div>
+      )}
+
+      {/* DISPUTE OPTION: Available to buyer/seller during active fulfillment */}
+      {['paid', 'in_progress', 'pending_release'].includes(txn.status) && (isBuyerOnDeal || isSellerOnDeal) && (
+        <div className="mt-6 bg-white rounded-2xl border border-rose-200 shadow-sm p-5">
+          <p className="text-xs font-bold uppercase tracking-wider text-rose-600 mb-2">Need help with this deal?</p>
+          <p className="text-xs text-slate-500 mb-3">
+            If something went wrong with the delivery or service, you can open a dispute. An admin will review the case and issue a refund if necessary.
+          </p>
+          {disputeError && (
+            <p className="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">{disputeError}</p>
+          )}
+          <button
+            onClick={handleDisputeTransaction}
+            disabled={disputing}
+            className="rounded-xl border border-rose-300 bg-rose-50 hover:bg-rose-100 px-4 py-2 text-xs font-bold text-rose-700 transition-all shadow-sm disabled:opacity-50"
+          >
+            {disputing ? 'Opening dispute...' : 'Raise Dispute'}
           </button>
         </div>
       )}

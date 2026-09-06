@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react"
 import { AppContext } from "../../context/ContextProvider"
 import { fetchAllTransactionsAdmin } from "../../api"
 import { Link } from 'react-router-dom'
-import { ArrowUpRight, CheckCircle, Building2 } from 'lucide-react'
+import { ArrowUpRight, CheckCircle, Building2, XCircle } from 'lucide-react'
 import StatusBadge from '../StatusBadge'
 import axios from 'axios'
 
@@ -47,6 +47,24 @@ const AdminAllTransactionsContent = () => {
     } catch (err) {
       console.error(err.response?.data?.message || err.message)
       alert(err.response?.data?.message || 'Could not complete payout.')
+    } finally {
+      setActionLoadingId(null)
+    }
+  }
+
+  const handleResolveDispute = async (txnId, winner) => {
+    const actionLabel = winner === 'buyer' ? 'refund the buyer' : 'release funds to the seller and complete'
+    if (!window.confirm(`Are you sure you want to resolve this dispute in favor of the ${winner}? This will ${actionLabel}.`)) return
+
+    setActionLoadingId(txnId)
+    try {
+      const { data } = await axios.put(`/admin/transactions/${txnId}/resolve`, { winner })
+      if (data.transaction) {
+        setTransactions(prev => prev.map(t => (t._id === txnId ? data.transaction : t)))
+      }
+    } catch (err) {
+      console.error(err.response?.data?.message || err.message)
+      alert(err.response?.data?.message || 'Could not resolve dispute.')
     } finally {
       setActionLoadingId(null)
     }
@@ -116,7 +134,7 @@ const AdminAllTransactionsContent = () => {
                         )}
                       </td>
                       <td className="py-3.5 px-4 text-right space-y-2">
-                        {/* Admin Action Button: Only active when buyer requests release / pending release */}
+                        {/* Admin Action Button: Pending Release */}
                         {txn.status === 'pending_release' && (
                           <div>
                             <button
@@ -130,6 +148,31 @@ const AdminAllTransactionsContent = () => {
                             </button>
                           </div>
                         )}
+
+                        {/* Admin Action Buttons: Disputed */}
+                        {txn.status === 'disputed' && (
+                          <div className="flex flex-col gap-1.5 items-end">
+                            <button
+                              onClick={() => handleResolveDispute(txn._id, 'buyer')}
+                              disabled={isProcessing}
+                              className="inline-flex items-center gap-1 bg-rose-600 hover:bg-rose-700 text-white font-bold text-[10px] px-2.5 py-1.5 rounded-lg transition-all disabled:opacity-50 shadow-sm"
+                              title="Rule in favor of buyer and issue refund"
+                            >
+                              <XCircle className="h-3 w-3" />
+                              {isProcessing ? 'Processing...' : 'Refund Buyer'}
+                            </button>
+                            <button
+                              onClick={() => handleResolveDispute(txn._id, 'seller')}
+                              disabled={isProcessing}
+                              className="inline-flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] px-2.5 py-1.5 rounded-lg transition-all disabled:opacity-50 shadow-sm"
+                              title="Rule in favor of seller and release payout"
+                            >
+                              <CheckCircle className="h-3 w-3" />
+                              {isProcessing ? 'Processing...' : 'Payout Seller'}
+                            </button>
+                          </div>
+                        )}
+
                         <div>
                           <Link to={`/admin/dashboard/transaction/${txn._id}`} className="inline-flex items-center gap-1 text-emerald-700 font-bold hover:underline text-[11px]">
                             View <ArrowUpRight className="h-3 w-3" />
