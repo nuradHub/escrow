@@ -31,7 +31,7 @@ function Row({ label, value }) {
 function Stepper({ status }) {
   if (TERMINAL_NEGATIVE.includes(status)) {
     const copy = {
-      disputed: { title: 'This transaction is disputed', body: 'An admin is reviewing the case and will release or refund the funds.' },
+      disputed: { title: 'This transaction is disputed', body: 'An admin is reviewing the case to release or refund the funds. Contact support at escrow@support.com.' },
       refunded: { title: 'Funds were refunded to the buyer', body: 'This transaction is closed.' },
       canceled: { title: 'Transaction was canceled', body: 'No funds are held for this deal.' },
     }[status]
