@@ -310,20 +310,28 @@ export default function TransactionDetail() {
           <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
             <CreditCard className="h-3.5 w-3.5" /> Fund this transaction
           </p>
-          <p className="text-xs text-slate-500">
-            You'll be sent to Tazapay's secure checkout to pay {formatAmount(txn?.totalAmount, txn?.currency)}.
-            The seller won't see this money until you confirm you're satisfied.
-          </p>
-          {payError && (
-            <p className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">{payError}</p>
+          {counterpartySet ? (
+            <>
+              <p className="text-xs text-slate-500">
+                You'll be sent to Tazapay's secure checkout to pay {formatAmount(txn?.totalAmount, txn?.currency)}.
+                The seller won't see this money until you confirm you're satisfied.
+              </p>
+              {payError && (
+                <p className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">{payError}</p>
+              )}
+              <button
+                onClick={handlePay}
+                disabled={paying}
+                className="mt-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white transition-all shadow-sm disabled:opacity-50"
+              >
+                {paying ? 'Redirecting to Tazapay…' : `Pay ${formatAmount(txn?.totalAmount, txn?.currency)} with Tazapay`}
+              </button>
+            </>
+          ) : (
+            <p className="text-xs text-amber-600 font-medium">
+              Please invite the seller below before you can fund this transaction.
+            </p>
           )}
-          <button
-            onClick={handlePay}
-            disabled={paying}
-            className="mt-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white transition-all shadow-sm disabled:opacity-50"
-          >
-            {paying ? 'Redirecting to Tazapay…' : `Pay ${formatAmount(txn?.totalAmount, txn?.currency)} with Tazapay`}
-          </button>
         </div>
       )}
 
