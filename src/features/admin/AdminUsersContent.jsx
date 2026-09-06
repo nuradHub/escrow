@@ -68,7 +68,7 @@ const AdminUsersContent = ({ loading, users, error, setUsers, setAdmins }) => {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         {loading && <p className="py-14 text-center text-xs text-slate-400">Loading users database…</p>}
         {error && <p className="py-14 text-center text-xs text-rose-600">{error}</p>}
-        {!loading && !error && users.length === 0 && (
+        {!loading && !error && users?.length === 0 && (
           <p className="py-14 text-center text-xs text-slate-500">No registered user records found in the database.</p>
         )}
 

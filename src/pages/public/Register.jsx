@@ -1,7 +1,7 @@
 import { Circle, Eye, AlertCircle, LoaderCircle, ShieldCheck } from "lucide-react"
 import Header from "./Header"
 import { Link, useNavigate } from "react-router-dom"
-import { useContext, useEffect, useState } from "react"
+import { useContext, useState } from "react"
 import { AppContext } from "../../context/ContextProvider"
 
 const Register = () => {
@@ -56,8 +56,8 @@ const Register = () => {
               <div className="flex flex-col flex-1 gap-2 w-full">
                 <p>I am the...</p>
                 <div className="flex gap-2">
-                  <button className={`${role === 'buyer' ? 'bg-emerald-500' : 'bg-white-500 text-black'} border border-slate-400 font-medium p-2 rounded-xl flex-1`} onClick={() => setRole('buyer')}>Buyer</button>
-                  <button className={`${role === 'seller' ? 'bg-emerald-500' : 'bg-white-500 text-black'} border border-slate-400 font-medium p-2 rounded-xl  flex-1`} onClick={() => setRole('seller')}>Seller</button>
+                  <button type="button" className={`${role === 'buyer' ? 'bg-emerald-500 text-white' : 'bg-white text-black'} border border-slate-400 font-medium p-2 rounded-xl flex-1`} onClick={() => setRole('buyer')}>Buyer</button>
+                  <button type="button" className={`${role === 'seller' ? 'bg-emerald-500 text-white' : 'bg-white text-black'} border border-slate-400 font-medium p-2 rounded-xl flex-1`} onClick={() => setRole('seller')}>Seller</button>
                 </div>
               </div>
 
@@ -89,8 +89,27 @@ const Register = () => {
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="Country" className="text-slate-800">Country</label>
-                  <input type="text" id='country' name='country' placeholder="US" className="border border-slate-300 py-2 px-4 rounded-xl focus:outline-0 focus:border-slate-500" required onChange={(e) => setCountry(e.target.value)} value={country} />
+                  <label htmlFor="country" className="text-slate-800">Country</label>
+                  <select 
+                    id='country' 
+                    name='country' 
+                    className="border border-slate-300 py-2 px-4 rounded-xl focus:outline-0 focus:border-slate-500 bg-white" 
+                    required 
+                    onChange={(e) => setCountry(e.target.value)} 
+                    value={country}
+                  >
+                    <option value="" disabled>Select your country</option>
+                    <option value="NG">Nigeria</option>
+                    <option value="GB">United Kingdom</option>
+                    <option value="US">United States</option>
+                    <option value="CA">Canada</option>
+                    <option value="GH">Ghana</option>
+                    <option value="ZA">South Africa</option>
+                    <option value="KE">Kenya</option>
+                    <option value="DE">Germany</option>
+                    <option value="FR">France</option>
+                    <option value="AU">Australia</option>
+                  </select>
                 </div>
                 <button type="submit" className="flex items-center justify-center bg-slate-900 text-white font-medium p-2 rounded-xl flex-1 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60" disabled={isLoading}>{isLoading ? <LoaderCircle size={20} className="animate-spin" /> : 'Create account'}</button>
               </form>
